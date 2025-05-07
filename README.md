@@ -1,10 +1,9 @@
 # SBSSEG_2025_python
 ## Requisitos e instalação
-´´´
+```
 cd pqc_algorithms
 bash install.sh
-´´´
-## Ambiente virtual
+```
 Antes de executar os algoritmos é precisos ativar o ambiente virtual.
 
 Criar o ambiente virtual.
