@@ -28,8 +28,31 @@ pprint(sigs, compact=True)
 #  'cross-rsdpg-192-small', 'cross-rsdpg-256-balanced', 'cross-rsdpg-256-fast',
 #  'cross-rsdpg-256-small']
 Claimed_NIST_Level_5=['Dilithium5','ML-DSA-87', 'SPHINCS+-SHA2-256f-simple','SPHINCS+-SHA2-256s-simple','SPHINCS+-SHAKE-256f-simple','SPHINCS+-SHAKE-256s-simple']
-
 message = "This is the message to sign".encode()
+
+#warm up executions
+for i in range(1000):
+    with oqs.Signature('Dilithium5') as signer:
+            with oqs.Signature('Dilithium5') as verifier:
+               
+                # Signer generates its keypair
+                signer_public_key = signer.generate_keypair()
+                # Optionally, the secret key can be obtained by calling export_secret_key()
+                # and the signer can later be re-instantiated with the key pair:
+                # secret_key = signer.export_secret_key()
+
+                # Store key pair, wait... (session resumption):
+                # signer = oqs.Signature(sigalg, secret_key)
+
+                # Signer signs the message
+                
+                signature = signer.sign(message)
+                # Verifier verifies the signature
+                
+                is_valid = verifier.verify(message, signature, signer_public_key)
+                
+
+
 # Create signer and verifier with sample signature mechanisms
 for alg in Claimed_NIST_Level_5:
     sigalg = alg
