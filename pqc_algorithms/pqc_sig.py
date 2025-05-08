@@ -30,6 +30,7 @@ pprint(sigs, compact=True)
 Claimed_NIST_Level_5=['Dilithium5','ML-DSA-87', 'SPHINCS+-SHA2-256f-simple','SPHINCS+-SHA2-256s-simple','SPHINCS+-SHAKE-256f-simple','SPHINCS+-SHAKE-256s-simple']
 message = "This is the message to sign".encode()
 
+targets=['Dilithium5','SPHINCS+-SHA2-192f-simple']
 #warm up executions
 for i in range(1000):
     with oqs.Signature('Dilithium5') as signer:
@@ -54,9 +55,10 @@ for i in range(1000):
 
 
 # Create signer and verifier with sample signature mechanisms
-for alg in Claimed_NIST_Level_5:
+for alg in targets:
     sigalg = alg
     f=open(f"results/{sigalg}.csv", "w")
+    f.write(f'{sigalg},{sigalg}')
     f.write(f"Signature,Verify\n")
     print(f"{sigalg}")
     for i in range(NUMBER_OF_EXECUTION):
@@ -82,4 +84,4 @@ for alg in Claimed_NIST_Level_5:
                 is_valid = verifier.verify(message, signature, signer_public_key)
                 verify_time=time_ns()-verify_time
 
-                f.write(f"{sign_time},{verify_time}\n")
+                f.write(f"{sign_time/1e+6},{verify_time/1e+6}\n")

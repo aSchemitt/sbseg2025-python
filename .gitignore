@@ -9,3 +9,4 @@ pqc_algorithms/*.csv
 ecdsa/*.csv
 pqc_algorithms/out
 pqc_algorithms/results
+ecdsa/*.csv

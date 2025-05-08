@@ -14,7 +14,7 @@ sign_time_lst=[]
 verify_time_lst=[]
 f=open("results/ecdsa265.csv","w")
 
-f.write("Signing, Verify")
+f.write("Signing, Verify\n")
 for i in range(10000):
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60))
     random_string=random_string.encode("utf-8")
@@ -44,7 +44,7 @@ sk = SigningKey.generate(curve=NIST384p)
 vk = sk.verifying_key
 
 f=open("results/ecdsa384.csv","w")
-f.write("Signing, Verify")
+f.write("Signing, Verify\n")
 for i in range(10000):
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60))
     random_string=random_string.encode("utf-8")
