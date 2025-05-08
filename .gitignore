@@ -1,0 +1,11 @@
+.csv
+
+**/__pycache__
+**/venv
+
+pqc_algorithms/liboqs
+pqc_algorithms/liboqs-python
+pqc_algorithms/*.csv
+ecdsa/*.csv
+pqc_algorithms/out
+pqc_algorithms/results
