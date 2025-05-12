@@ -7,6 +7,7 @@ import random
 import string
 import numpy as np
 import os
+import csv
 
 # Criar diretório 'results' se não existir
 if not os.path.exists("results"):
@@ -45,8 +46,9 @@ def run_test(self, curve:ec.EllipticCurve):
 
     # Actual run
     with open("results/{}.csv".format(algorithm),"w") as f:
-
-        f.write("Signing, Verify\n")
+        writer = csv.writer(f)
+        writer.writerow(["Signing (ns)", "Verify (ns)"])
+        
         for i in range(runs):
             random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60)).encode("utf-8")
 
@@ -73,7 +75,7 @@ def run_test(self, curve:ec.EllipticCurve):
             verify_time=time_ns()-verify_time
             verify_time_lst.append(verify_time)
 
-            f.write(f"{sign_time},{verify_time}\n")
+            writer.writerow([sign_time, verify_time])
         # f.write(f"Media: {np.average(sign_time_lst)}\n{np.std(verify_time_lst)}\n")
 
     print(algorithm)
