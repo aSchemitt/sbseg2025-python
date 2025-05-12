@@ -1,67 +1,87 @@
-from ecdsa import SigningKey, NIST256p,NIST384p
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import InvalidSignature
 from time import time_ns
 import random
 import string
 import numpy as np
+import os
 
+# Criar diretório 'results' se não existir
+if not os.path.exists("results"):
+    os.makedirs("results")
 
+runs=10000
+warmUp=1000
 
+def run_test(self, curve:ec.EllipticCurve):
+    # Create keys
+    sk = ec.generate_private_key(
+        curve,
+    )
 
-sk = SigningKey.generate(curve=NIST256p)
+    vk = sk.public_key()
+    sign_time_lst=[]
+    verify_time_lst=[]
 
-vk = sk.verifying_key
-sign_time_lst=[]
-verify_time_lst=[]
-f=open("results/ecdsa265.csv","w")
+    algorithm = curve.name
 
-f.write("Signing, Verify\n")
-for i in range(10000):
-    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60))
-    random_string=random_string.encode("utf-8")
+    # WarmUp
+    for _ in range(warmUp):
+        random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60)).encode("utf-8")
+        signature = sk.sign(
+                random_string,
+                ec.ECDSA(hashes.SHA256())
+            )
+        try:
+                vk.verify(
+                    signature,
+                    random_string,
+                    ec.ECDSA(hashes.SHA256())
+                )
+        except:
+            pass
 
+    # Actual run
+    with open("results/{}.csv".format(algorithm),"w") as f:
 
-    sign_time=time_ns()
-    signature = sk.sign(random_string)
-    sign_time=time_ns()-sign_time
-    sign_time_lst.append(sign_time)
+        f.write("Signing, Verify\n")
+        for i in range(runs):
+            random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60)).encode("utf-8")
 
-    verify_time=time_ns()
-    vk.verify(signature, random_string)
-    verify_time=time_ns()-verify_time
-    verify_time_lst.append(verify_time)
+            sign_time=time_ns()
+            signature = sk.sign(
+                random_string,
+                ec.ECDSA(hashes.SHA256())
+            )
+            sign_time=time_ns()-sign_time
+            sign_time_lst.append(sign_time)
 
-    f.write(f"{sign_time},{verify_time}\n")
-# f.write(f"Media: {np.average(sign_time_lst)}\n{np.std(verify_time_lst)}\n")
+            verify_time=time_ns()
+            try:
+                vk.verify(
+                    signature,
+                    random_string,
+                    ec.ECDSA(hashes.SHA256())
+                )
+                
+            except InvalidSignature:
+                print(f"AVISO: Verificação de P-256 falhou na iteração {i}!")
+                pass
+        
+            verify_time=time_ns()-verify_time
+            verify_time_lst.append(verify_time)
 
-print("NIST256p")
-print(f"Signing:Media({np.average(sign_time_lst)}), STD({np.std(sign_time_lst)})")
-print(f"Verify:Media({np.average(verify_time_lst)}), STD({np.std(verify_time_lst)})")
+            f.write(f"{sign_time},{verify_time}\n")
+        # f.write(f"Media: {np.average(sign_time_lst)}\n{np.std(verify_time_lst)}\n")
 
-sign_time_lst.clear()
-verify_time_lst.clear()
-sk = SigningKey.generate(curve=NIST384p)
+    print(algorithm)
+    print(f"Signing:Media({np.average(sign_time_lst)}), STD({np.std(sign_time_lst)})")
+    print(f"Verify:Media({np.average(verify_time_lst)}), STD({np.std(verify_time_lst)})")
+    
+curves= [ec.SECP256R1(), ec.SECP384R1(), ec.SECP521R1()]
 
-vk = sk.verifying_key
+for curve in curves:
+    run_test("", curve)
 
-f=open("results/ecdsa384.csv","w")
-f.write("Signing, Verify\n")
-for i in range(10000):
-    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=60))
-    random_string=random_string.encode("utf-8")
-
-
-    sign_time=time_ns()
-    signature = sk.sign(random_string)
-    sign_time=time_ns()-sign_time
-    sign_time_lst.append(sign_time)
-
-    verify_time=time_ns()
-    vk.verify(signature, random_string)
-    verify_time=time_ns()-verify_time
-    verify_time_lst.append(verify_time)
-    f.write(f"{sign_time},{verify_time}\n")
-
-# f.write(f"Media: {np.average(sign_time_lst)}\n{np.std(verify_time_lst)}\n")
-print("NIST384p")
-print(f"Signing:Media({np.average(sign_time_lst)}), STD({np.std(sign_time_lst)})")
-print(f"Verify:Media({np.average(verify_time_lst)}), STD({np.std(verify_time_lst)})")
