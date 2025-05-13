@@ -20,7 +20,6 @@ source venv/bin/activate
 Instale as dependências
 ```
 pip install -r requirements.txt
-pip install cryptography
 ```
 
 Para desativar o ambiente virtual.
